@@ -11,7 +11,7 @@ class BindResult
     /** @var ConstraintViolationListInterface */
     private $violations;
     /** @var @mixed */
-    private $aliases;
+    private $metadata;
 
     public function __construct($data, $violations = [], $metadata = [])
     {
