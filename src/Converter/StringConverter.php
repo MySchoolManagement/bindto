@@ -12,7 +12,13 @@ class StringConverter extends AbstractPrimitiveConverter
      */
     public function onApply($value, $propertyName, array $options, $from)
     {
-        return null !== $value ? (string) $value : null;
+        if($value !== null){
+           $value = (string) $value;
+        }
+        if(!$options['disableTrimming']){
+            $value = trim($value);
+        }
+        return $value;
     }
 
     /**
@@ -29,5 +35,18 @@ class StringConverter extends AbstractPrimitiveConverter
     protected function createInvalidTypeException(string $propertyName, $value)
     {
         return ConversionException::fromDomain($propertyName, $value, 'Not a valid string', 'conversion_exception.primitive.string.not_a_valid_type');
+    }
+
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function configureOptions(OptionsResolver $resolver)
+    {
+        $resolver->setDefaults([
+            'disableTrimming' => false
+        ]);
+        $resolver->addAllowedTypes('disableTrimming', ['boolean']);
+        $resolver->setRequired(['method']);
     }
 }
