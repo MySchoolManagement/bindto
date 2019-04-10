@@ -6,7 +6,6 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class StringConverter extends AbstractPrimitiveConverter
 {
-
     /**
      * {@inheritdoc}
      */
@@ -15,9 +14,11 @@ class StringConverter extends AbstractPrimitiveConverter
         if($value !== null){
            $value = (string) $value;
         }
+
         if(!$options['disableTrimming']){
             $value = trim($value);
         }
+
         return $value;
     }
 
@@ -26,7 +27,7 @@ class StringConverter extends AbstractPrimitiveConverter
      */
     protected function needsConverting($value)
     {
-        return !is_string($value);
+        return true;
     }
 
     /**
@@ -43,10 +44,9 @@ class StringConverter extends AbstractPrimitiveConverter
      */
     protected function configureOptions(OptionsResolver $resolver)
     {
-        $resolver->setDefaults([
-            'disableTrimming' => false
-        ]);
-        $resolver->addAllowedTypes('disableTrimming', ['boolean']);
-        $resolver->setRequired(['method']);
+        parent::configureOptions($resolver);
+
+        $resolver->setDefault('disableTrimming', false);
+        $resolver->addAllowedTypes('disableTrimming', ['bool']);
     }
 }
