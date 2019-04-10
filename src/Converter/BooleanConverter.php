@@ -13,7 +13,7 @@ class BooleanConverter extends AbstractPrimitiveConverter
     public function onApply($value, $propertyName, array $options, $from)
     {
         if(!is_bool($value)){
-            return $this->createInvalidTypeException($propertyName, $value);
+            throw $this->createInvalidTypeException($propertyName, $value);
         }
         return (bool) $value;
     }
