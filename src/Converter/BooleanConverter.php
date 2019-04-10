@@ -13,7 +13,7 @@ class BooleanConverter extends AbstractPrimitiveConverter
     public function onApply($value, $propertyName, array $options, $from)
     {
         if(!is_bool($value)){
-            return ConversionException::fromDomain($propertyName, $value, 'Not a valid boolean', 'conversion_exception.primitive.boolean.not_a_valid_type');
+            return $this->createInvalidTypeException($propertyName, $value);
         }
         return (bool) $value;
     }
