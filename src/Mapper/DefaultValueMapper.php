@@ -32,7 +32,7 @@ class DefaultValueMapper implements MapperInterface
     /**
      * {@inheritdoc}
      */
-    public function map($from, $to)
+    public function map($from, $to, array $metadata)
     {
         if (is_object($to)) {
             $reflector = new \ReflectionClass($to);

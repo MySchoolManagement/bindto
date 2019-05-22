@@ -124,15 +124,15 @@ class ConvertingObjectMapper implements MapperInterface
         $this->enabled = true;
     }
 
-    public function map($from, $to)
+    public function map($from, $to, array $metadata)
     {
-        $this->propertyMapper->map($from, $to);
+        $this->propertyMapper->map($from, $to, $metadata);
 
         if (is_object($to)) {
             $reflector = new \ReflectionClass($to);
 
-            array_map(function (\ReflectionProperty $property) use ($from, $to) {
-                array_map(function ($annotation) use ($property, $from, $to) {
+            array_map(function (\ReflectionProperty $property) use ($from, $to, $metadata) {
+                array_map(function ($annotation) use ($property, $from, $to, $metadata) {
                     $convertAnnotations = [];
 
                     if ($annotation instanceof Converters) {
@@ -148,7 +148,7 @@ class ConvertingObjectMapper implements MapperInterface
                     }
 
                     foreach ($convertAnnotations as $convertAnnotation) {
-                        $this->processProperty($convertAnnotation, $property, $from, $to);
+                        $this->processProperty($convertAnnotation, $property, $from, $to, $metadata);
                     }
                 }, $this->annotationReader->getPropertyAnnotations($property));
             }, $reflector->getProperties());
@@ -157,7 +157,7 @@ class ConvertingObjectMapper implements MapperInterface
         return $to;
     }
 
-    private function processProperty(Convert $annotation, \ReflectionProperty $property, $source, $obj)
+    private function processProperty(Convert $annotation, \ReflectionProperty $property, $source, $obj, array $metadata)
     {
         $propertyName = $property->getName();
         $converter = $annotation->converter;
@@ -175,7 +175,7 @@ class ConvertingObjectMapper implements MapperInterface
                 $convertedItem = null;
 
                 if (null !== $filteredItem) {
-                    $convertedItem = $this->convert($filteredItem, $propertyPath, $converter, $options, $obj);
+                    $convertedItem = $this->convert($filteredItem, $propertyPath, $converter, $options, $obj, $metadata);
                 }
 
                 $this->setPropertyValue($obj, $propertyPath, $convertedItem);
@@ -185,7 +185,7 @@ class ConvertingObjectMapper implements MapperInterface
             $convertedValue = null;
 
             if (null !== $filteredValue) {
-                $convertedValue = $this->convert($filteredValue, $propertyName, $converter, $options, $obj);
+                $convertedValue = $this->convert($filteredValue, $propertyName, $converter, $options, $obj, $metadata);
             }
 
             $this->setPropertyValue($obj, $propertyName, $convertedValue);
@@ -245,7 +245,7 @@ class ConvertingObjectMapper implements MapperInterface
         return $flattened;
     }
 
-    protected function convert($value, $propertyPath, $converterName, array $converterOptions, $from)
+    protected function convert($value, $propertyPath, $converterName, array $converterOptions, $from, array $metadata)
     {
         $converter = $this->getConverterInstance($converterName);
         $isNestedConverter = $converter instanceof NestedObjectConverter;
@@ -260,7 +260,7 @@ class ConvertingObjectMapper implements MapperInterface
         }
 
         try {
-            return $converter->apply($value, $propertyPath, $converterOptions, $from);
+            return $converter->apply($value, $propertyPath, $converterOptions, $from, $metadata);
         } catch (ConversionException $ex) {
             if ($this->collectExceptions === true) {
                 $this->currentExceptionStackPointer['exceptions'][] = $ex;

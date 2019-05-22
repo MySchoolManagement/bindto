@@ -23,10 +23,12 @@ class ObjectConverter extends AbstractConverter
     /**
      * {@inheritdoc}
      */
-    public function apply($value, $propertyName, array $options, $from)
+    public function apply($value, $propertyName, array $options, $from, array $metadata)
     {
         $options = $this->resolveOptions($options);
-        $result = $this->binder->bind($value, $options['class']);
+        $result = $this->binder->bind($value, $options['class'], [], [
+            'parent' => $from,
+        ]);
 
         return $result->getData();
     }

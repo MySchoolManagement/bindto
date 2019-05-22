@@ -13,8 +13,9 @@ interface ConverterInterface
      * @param string $propertyName
      * @param array $options
      * @param mixed $from
+     * @param array $metadata
      * @return mixed
      * @throws ConversionException When the conversion fails
      */
-    public function apply($value, $propertyName, array $options, $from);
+    public function apply($value, $propertyName, array $options, $from, array $metadata);
 }

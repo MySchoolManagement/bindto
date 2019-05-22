@@ -9,7 +9,7 @@ abstract class AbstractPrimitiveConverter extends AbstractConverter
     /**
      * {@inheritdoc}
      */
-    public function apply($value, $propertyName, array $options, $from)
+    public function apply($value, $propertyName, array $options, $from, array $metadata)
     {
         $options = $this->resolveOptions($options);
         $isStrict = $options['strict'];

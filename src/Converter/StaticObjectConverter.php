@@ -9,7 +9,7 @@ class StaticObjectConverter extends AbstractConverter
     /**
      * {@inheritdoc}
      */
-    public function apply($value, $propertyName, array $options, $from)
+    public function apply($value, $propertyName, array $options, $from, array $metadata)
     {
         if ($value instanceof $options['class']) {
             return $value;

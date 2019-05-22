@@ -9,7 +9,7 @@ class ServerRequestPSR7Mapper implements MapperInterface
 {
     use PSR7RequestTrait;
 
-    public function map($from, $to)
+    public function map($from, $to, array $metadata)
     {
         $copyOfTo = $to;
         $this->fillPropertiesFromPSR7Request($from, $copyOfTo);

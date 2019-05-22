@@ -24,7 +24,7 @@ class NestedObjectConverter extends AbstractConverter
     /**
      * {@inheritdoc}
      */
-    public function apply($value, $propertyName, array $options, $from)
+    public function apply($value, $propertyName, array $options, $from, array $metadata)
     {
         $options = $this->resolveOptions($options);
         $prefix = $options['prefix'];
@@ -45,7 +45,7 @@ class NestedObjectConverter extends AbstractConverter
 
         $this->parentMapper->enterNestedExceptionStack($propertyName);
         {
-            $result = $this->parentMapper->map($nestedSource, new $options['class']);
+            $result = $this->parentMapper->map($nestedSource, new $options['class'], $metadata);
         }
         $this->parentMapper->exitNestedExceptionStack();
 

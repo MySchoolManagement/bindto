@@ -48,16 +48,16 @@ class MapperStrategy implements MapperInterface
      *
      * @throws \Exception
      */
-    public function map($from, $to)
+    public function map($from, $to, array $metadata)
     {
         foreach ($this->strategies as $class => $strategy) {
             if ($from instanceof $class) {
-                return $strategy->map($from, $to);
+                return $strategy->map($from, $to, $metadata);
             }
         }
 
         if ($this->fallaback) {
-            return $this->fallaback->map($from, $to);
+            return $this->fallaback->map($from, $to, $metadata);
         }
 
         throw new MapperNotFoundException($from);

@@ -9,8 +9,9 @@ interface MapperInterface
      *
      * @param $from
      * @param $to
+     * @param $metadata
      *
      * @return mixed
      */
-    public function map($from, $to);
+    public function map($from, $to, array $metadata);
 }

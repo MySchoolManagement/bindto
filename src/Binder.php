@@ -67,7 +67,7 @@ class Binder
      *
      * @throws \Exception
      */
-    public function bind($request, $object, array $validationGroups = [])
+    public function bind($request, $object, array $validationGroups = [], array $metadata = [])
     {
         if (!is_object($object)) {
             $object = new $object();
@@ -85,7 +85,7 @@ class Binder
 
         $issues = $this->validator->validate($object, null, $groups);
 
-        return $this->createBindResultFromFilledObject($issues, $newObject);
+        return $this->createBindResultFromFilledObject($issues, $newObject, $metadata);
     }
 
     protected function createBindResultFromFilledObject($issues, $object, $metadata=[])

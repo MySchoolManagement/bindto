@@ -13,7 +13,7 @@ class UuidConverter extends AbstractConverter
     /**
      * {@inheritdoc}
      */
-    public function apply($value, $propertyPath, array $options, $from)
+    public function apply($value, $propertyPath, array $options, $from, array $metadata)
     {
         if (true === is_object($value)) {
             return $value;

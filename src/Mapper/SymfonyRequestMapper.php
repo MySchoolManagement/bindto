@@ -9,7 +9,7 @@ class SymfonyRequestMapper implements MapperInterface
 {
     use HTTPPropertyTrait;
 
-    public function map($from, $to)
+    public function map($from, $to, array $metadata)
     {
         $copyOfTo = $to;
         $this->copyPropertiesFromRequest($from, $copyOfTo);
