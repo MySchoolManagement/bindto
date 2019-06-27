@@ -8,7 +8,7 @@ use Symfony\Component\Validator\Constraints\Valid;
  * @Annotation
  * @Target({"PROPERTY", "ANNOTATION"})
  */
-class Convert /* FIXME: extends Valid */
+class Convert implements ConvertAnnotationInterface
 {
 
     /**
@@ -32,4 +32,20 @@ class Convert /* FIXME: extends Valid */
      * @var array
      */
     public $options = [];
+
+    /**
+     * {@inheritdoc}
+     */
+    public function isArray(): bool
+    {
+        return $this->isArray;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getOptions(): array
+    {
+        return $this->options;
+    }
 }

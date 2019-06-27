@@ -1,7 +1,10 @@
 <?php
 namespace Bindto\Converter;
 
+use Bindto\Annotation\ConvertAnnotationInterface;
+use Bindto\Annotation\ConvertToDateTime;
 use Bindto\Exception\ConversionException;
+use MySchool\Module\Foundation\ValueObject\DateTime;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class DateTimeConverter extends AbstractConverter
@@ -42,4 +45,33 @@ class DateTimeConverter extends AbstractConverter
         ]);
         $resolver->addAllowedTypes('format', ['null', 'string']);
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function canProduceType(string $type): bool
+    {
+        return DateTime::class === $type;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function supportsAnnotation(ConvertAnnotationInterface $annotation): bool
+    {
+        return $annotation instanceof ConvertToDateTime;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function autoconfigure(ConvertAnnotationInterface $sourceAnnotation, string $typeName, bool $isArray, bool $isNullable): array
+    {
+        $annotation = new ConvertToDateTime();
+        $annotation->isArray = $isArray;
+        $annotation->format = DateTime::DEFAULT_FORMAT;
+
+        return [];
+    }
+
 }

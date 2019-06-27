@@ -1,6 +1,7 @@
 <?php
 namespace Bindto\Converter;
 
+use Bindto\Annotation\ConvertAnnotationInterface;
 use Bindto\Binder;
 use Bindto\Converter\AbstractConverter;
 use Bindto\Mapper\ConvertingObjectMapper;
@@ -64,4 +65,29 @@ class NestedObjectConverter extends AbstractConverter
         $resolver->addAllowedTypes('class', ['string']);
         $resolver->addAllowedTypes('prefix', ['string']);
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function canProduceType(string $type): bool
+    {
+        return false;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function supportsAnnotation(ConvertAnnotationInterface $annotation): bool
+    {
+        return false;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function autoconfigure(ConvertAnnotationInterface $sourceAnnotation, string $typeName, bool $isArray, bool $isNullable): array
+    {
+        return [];
+    }
+
 }

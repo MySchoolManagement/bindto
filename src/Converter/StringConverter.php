@@ -1,6 +1,8 @@
 <?php
 namespace Bindto\Converter;
 
+use Bindto\Annotation\ConvertAnnotationInterface;
+use Bindto\Annotation\ConvertToString;
 use Bindto\Exception\ConversionException;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -64,13 +66,40 @@ class StringConverter extends AbstractPrimitiveConverter
         parent::configureOptions($resolver);
 
         $resolver->setDefault('disableTrimming', false);
-        $resolver->setDefault('regex', '');
-        $resolver->setDefault('regexConstant', '');
+        $resolver->setDefault('regex', null);
+        $resolver->setDefault('regexConstant', null);
         $resolver->setDefault('translationKeyConstant', null);
 
         $resolver->addAllowedTypes('disableTrimming', ['bool']);
-        $resolver->addAllowedTypes('regex', ['string']);
-        $resolver->addAllowedTypes('regexConstant', ['string']);
+        $resolver->addAllowedTypes('regex', ['null', 'string']);
+        $resolver->addAllowedTypes('regexConstant', ['null', 'string']);
         $resolver->addAllowedTypes('translationKeyConstant', ['null', 'string']);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function canProduceType(string $type): bool
+    {
+        return 'string' === $type;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function supportsAnnotation(ConvertAnnotationInterface $annotation): bool
+    {
+        return $annotation instanceof ConvertToString;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function autoconfigure(ConvertAnnotationInterface $sourceAnnotation, string $typeName, bool $isArray, bool $isNullable): array
+    {
+        $annotation = new ConvertToString();
+        $annotation->isArray = $isArray;
+
+        return [$annotation];
     }
 }

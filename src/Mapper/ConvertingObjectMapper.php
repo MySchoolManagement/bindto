@@ -2,6 +2,10 @@
 
 namespace Bindto\Mapper;
 
+use Assert\Assertion;
+use Bindto\Annotation\AutoConvert;
+use Bindto\Annotation\AutoConvertWithNestedValidation;
+use Bindto\Annotation\ConvertAnnotationInterface;
 use Bindto\Annotation\Converters;
 use Bindto\Converter\NestedObjectConverter;
 use Bindto\ConverterInterface;
@@ -9,7 +13,12 @@ use Bindto\Exception\ConversionException;
 use Doctrine\Common\Annotations\Reader;
 use Bindto\Annotation\Convert;
 use Bindto\MapperInterface;
+use function Functional\filter;
+use function Functional\first;
+use function Functional\each;
+use function Functional\map;
 use Symfony\Component\PropertyAccess\PropertyAccess;
+use Ursula\Common\Exception\DomainException;
 
 /**
  * Mapper that reads @Convert annotations and attempts to convert the value.
@@ -46,6 +55,11 @@ class ConvertingObjectMapper implements MapperInterface
     private $defaultValueProcessor;
 
     /**
+     * @var AutoConverterProcessor
+     */
+    private $autoConverterProcessor;
+
+    /**
      * @var array
      */
     private $converters = [];
@@ -72,38 +86,35 @@ class ConvertingObjectMapper implements MapperInterface
      */
     private $enabled = true;
 
-    /**
-     * @param MapperInterface $propertyMapper
-     * @param Reader $annotationReader
-     * @param DefaultValueProcessor $defaultValueProcessor
-     * @param bool $collectExceptions
-     */
-    public function __construct(MapperInterface $propertyMapper, Reader $annotationReader, DefaultValueProcessor $defaultValueProcessor, $collectExceptions = false)
+    public function __construct(MapperInterface $propertyMapper, Reader $annotationReader, DefaultValueProcessor $defaultValueProcessor, bool $collectExceptions = false)
     {
         $this->propertyMapper = $propertyMapper;
         $this->annotationReader = $annotationReader;
         $this->defaultValueProcessor = $defaultValueProcessor;
+        $this->autoConverterProcessor = new AutoConverterProcessor($this);
         $this->collectExceptions = $collectExceptions;
         $this->propertyAccessor = PropertyAccess::createPropertyAccessor();
 
         $this->clearNestedExceptionStack();
     }
 
-    /**
-     * Makes a converter available.
-     *
-     * @param string $name
-     * @param string|object $converter
-     *
-     * @throws \LogicException When the converter isn't an implementation of {@see Bindto\ConverterInterface}
-     */
-    public function addConverter($name, $converter)
+    public function addConverter(string $name, ConverterInterface $converter)
     {
-        if (is_subclass_of($converter, ConverterInterface::class) === false) {
-            throw new \LogicException('$converter does not implement ConverterInterface');
+        if (array_key_exists($name, $this->converters)) {
+            throw new \LogicException(
+                sprintf('"%s" is already registered for another converter', $name)
+            );
         }
 
         $this->converters[$name] = $converter;
+    }
+
+    /**
+     * @return ConverterInterface[]
+     */
+    public function getConverters(): array
+    {
+        return $this->converters;
     }
 
     /**
@@ -131,40 +142,68 @@ class ConvertingObjectMapper implements MapperInterface
         if (is_object($to)) {
             $reflector = new \ReflectionClass($to);
 
-            array_map(function (\ReflectionProperty $property) use ($from, $to, $metadata) {
-                array_map(function ($annotation) use ($property, $from, $to, $metadata) {
+            each($reflector->getProperties(), function (\ReflectionProperty $property) use ($from, $to, $metadata) {
+                $expectedToBeAutoConfigured = false;
+                $propertyAnnotations = $this->annotationReader->getPropertyAnnotations($property);
+
+                $convertAnnotations = map($propertyAnnotations, function ($annotation) use ($property, $from, $to, $metadata, &$expectedToBeAutoConfigured) {
                     $convertAnnotations = [];
 
-                    if ($annotation instanceof Converters) {
+                    if ($annotation instanceof AutoConvert || $annotation instanceof AutoConvertWithNestedValidation) {
+                        $convertAnnotations = array_merge(
+                            $convertAnnotations,
+                            $this->autoConverterProcessor->process($annotation, $property)
+                        );
+
+                        $expectedToBeAutoConfigured = true;
+                    } elseif ($annotation instanceof Converters) {
                         $convertAnnotations = $annotation->converters;
-                    } else {
-                        if ($annotation instanceof Convert) {
-                            $convertAnnotations[] = $annotation;
-                        }
+                    } elseif ($annotation instanceof ConvertAnnotationInterface) {
+                        $convertAnnotations[] = $annotation;
                     }
 
-                    if ((true === $this->enabled) && (count($convertAnnotations) > 0)) {
-                        $this->defaultValueProcessor->process($property, $to);
-                    }
+                    return $convertAnnotations;
+                });
 
-                    foreach ($convertAnnotations as $convertAnnotation) {
-                        $this->processProperty($convertAnnotation, $property, $from, $to, $metadata);
-                    }
-                }, $this->annotationReader->getPropertyAnnotations($property));
-            }, $reflector->getProperties());
+                // FIXME: this cannot currently be enabled because some transfer objects inherit from parent that exposes
+                // properties but have no converters (e.g. DomainMessage)
+                /*if (empty($convertAnnotations)) {
+                    throw new DomainException(
+                        sprintf('Binding "%s::%s" but it has no conversion annotations', $property->getDeclaringClass()->getName(), $property->getName())
+                    );
+                }*/
+
+                if (empty($convertAnnotations)) {
+                    return;
+                }
+
+                $convertAnnotations = array_merge(...$convertAnnotations);
+
+                if ($expectedToBeAutoConfigured && empty($convertAnnotations)) {
+                    throw new DomainException(
+                        sprintf('Binding "%s::%s" was expected to be auto-configured but resulted in no conversion annotations', $property->getDeclaringClass()->getName(), $property->getName())
+                    );
+                }
+
+                if ($this->enabled && ! empty($convertAnnotations)) {
+                    $this->defaultValueProcessor->process($property, $to);
+                }
+
+                each($convertAnnotations, function ($annotation) use ($metadata, $to, $from, $property) {
+                    $this->processProperty($annotation, $property, $from, $to, $metadata);
+                });
+            });
         }
 
         return $to;
     }
 
-    private function processProperty(Convert $annotation, \ReflectionProperty $property, $source, $obj, array $metadata)
+    private function processProperty(ConvertAnnotationInterface $annotation, \ReflectionProperty $property, $source, $obj, array $metadata)
     {
         $propertyName = $property->getName();
-        $converter = $annotation->converter;
-        $options = $annotation->options;
         $value = $this->getPropertyValue($obj, $propertyName);
 
-        if (true === $annotation->isArray) {
+        if ($annotation->isArray()) {
             if (null === $value) {
                 return;
             }
@@ -175,7 +214,7 @@ class ConvertingObjectMapper implements MapperInterface
                 $convertedItem = null;
 
                 if (null !== $filteredItem) {
-                    $convertedItem = $this->convert($filteredItem, $propertyPath, $converter, $options, $obj, $metadata);
+                    $convertedItem = $this->convert($filteredItem, $propertyPath, $annotation, $obj, $metadata);
                 }
 
                 $this->setPropertyValue($obj, $propertyPath, $convertedItem);
@@ -185,7 +224,7 @@ class ConvertingObjectMapper implements MapperInterface
             $convertedValue = null;
 
             if (null !== $filteredValue) {
-                $convertedValue = $this->convert($filteredValue, $propertyName, $converter, $options, $obj, $metadata);
+                $convertedValue = $this->convert($filteredValue, $propertyName, $annotation, $obj, $metadata);
             }
 
             $this->setPropertyValue($obj, $propertyName, $convertedValue);
@@ -245,9 +284,20 @@ class ConvertingObjectMapper implements MapperInterface
         return $flattened;
     }
 
-    protected function convert($value, $propertyPath, $converterName, array $converterOptions, $from, array $metadata)
+    protected function convert($value, $propertyPath, ConvertAnnotationInterface $annotation, $from, array $metadata)
     {
-        $converter = $this->getConverterInstance($converterName);
+        if ($annotation instanceof Convert) {
+            if (! array_key_exists($annotation->converter, $this->converters)) {
+                throw new \LogicException(
+                    sprintf('Converter with the name "%s" could not be found', $annotation->converter)
+                );
+            }
+
+            $converter = $this->converters[$annotation->converter];
+        } else {
+            $converter = $this->getConverterFromAnnotation($annotation);
+        }
+
         $isNestedConverter = $converter instanceof NestedObjectConverter;
 
         // when converters are disabled we only want to run the nested converters so that we create the correct object structure
@@ -260,7 +310,7 @@ class ConvertingObjectMapper implements MapperInterface
         }
 
         try {
-            return $converter->apply($value, $propertyPath, $converterOptions, $from, $metadata);
+            return $converter->apply($value, $propertyPath, $annotation->getOptions(), $from, $metadata);
         } catch (ConversionException $ex) {
             if ($this->collectExceptions === true) {
                 $this->currentExceptionStackPointer['exceptions'][] = $ex;
@@ -273,21 +323,19 @@ class ConvertingObjectMapper implements MapperInterface
     }
 
     /**
-     * @param string $name
+     * @param ConvertAnnotationInterface $annotation
      * @return ConverterInterface
      *
      * @throws \LogicException When the converter does not exist
      */
-    protected function getConverterInstance($name)
+    protected function getConverterFromAnnotation(ConvertAnnotationInterface $annotation)
     {
-        if (array_key_exists($name, $this->converters) === false) {
-            throw new \LogicException('Unknown converter: ' . $name);
-        }
+        $converter = first($this->converters, function (ConverterInterface $converter) use ($annotation) {
+            return $converter->supportsAnnotation($annotation);
+        });
 
-        $converter = $this->converters[$name];
-
-        if (is_object($converter) === false) {
-            $converter = new $converter;
+        if (null === $converter) {
+            throw new \LogicException('Could not find converter for: ' . get_class($annotation));
         }
 
         return $converter;
@@ -331,7 +379,7 @@ class ConvertingObjectMapper implements MapperInterface
 
         // filter null values to satisfy the case where a nested object is optional
         $itemSize = count($item);
-        $filtered = array_filter($item, function($e) {
+        $filtered = filter($item, function($e) {
             return !is_null($e);
         });
         $newSize = count($filtered);

@@ -1,6 +1,7 @@
 <?php
 namespace Bindto\Converter;
 
+use Bindto\Annotation\ConvertAnnotationInterface;
 use Bindto\Exception\ConversionException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityNotFoundException;
@@ -81,5 +82,29 @@ class DoctrineConverter extends AbstractConverter
         $resolver->addAllowedTypes('method', ['string']);
         $resolver->addAllowedTypes('arguments', ['array']);
         $resolver->setRequired(['entity', 'method']);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function canProduceType(string $type): bool
+    {
+        return false;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function supportsAnnotation(ConvertAnnotationInterface $annotation): bool
+    {
+        return false;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function autoconfigure(ConvertAnnotationInterface $sourceAnnotation, string $typeName, bool $isArray, bool $isNullable): array
+    {
+        return [];
     }
 }
