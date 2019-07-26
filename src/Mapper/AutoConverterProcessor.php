@@ -55,6 +55,10 @@ class AutoConverterProcessor
             return $converter->canProduceType($typeInfo->typeName);
         });
 
+        if (null === $converter) {
+            throw new \DomainException('There is no converter that can produce this type: ' . $typeInfo->typeName);
+        }
+
         return $converter->autoconfigure($annotation, $typeInfo->typeName, $typeInfo->isArray, $typeInfo->isNullable);
     }
 
