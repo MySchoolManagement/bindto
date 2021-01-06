@@ -10,7 +10,6 @@ use Bindto\Annotation\Converters;
 use Bindto\Converter\NestedObjectConverter;
 use Bindto\ConverterInterface;
 use Bindto\Exception\ConversionException;
-use Bindto\Exception\MultipleConversionException;
 use Doctrine\Common\Annotations\Reader;
 use Bindto\Annotation\Convert;
 use Bindto\MapperInterface;
@@ -312,16 +311,12 @@ class ConvertingObjectMapper implements MapperInterface
 
         try {
             return $converter->apply($value, $propertyPath, $annotation->getOptions(), $from, $metadata);
-        } catch (ConversionException | MultipleConversionException $ex) {
-            if (! $this->collectExceptions) {
+        } catch (ConversionException $ex) {
+            if ($this->collectExceptions === true) {
+                $this->currentExceptionStackPointer['exceptions'][] = $ex;
+            } else {
                 throw $ex;
             }
-
-            $list = $ex instanceof MultipleConversionException ? $ex->getConversionExceptions() : [$ex];
-
-            each($list, function (ConversionException $ex) {
-                $this->currentExceptionStackPointer['exceptions'][] = $ex;
-            });
         }
 
         return null;
