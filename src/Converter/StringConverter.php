@@ -4,11 +4,31 @@ namespace Bindto\Converter;
 use Bindto\Annotation\ConvertAnnotationInterface;
 use Bindto\Annotation\ConvertToString;
 use Bindto\Exception\ConversionException;
+use MySchool\Module\Curriculum\CurriculumTranslations;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Ursula\EntityFramework\Validation\Check\CheckResult;
 
 class StringConverter extends AbstractPrimitiveConverter
 {
     const DEFAULT_TRANSLATION_KEY = 'conversion_exception.primitive.string.not_a_valid_type';
+
+    /**
+     * @var ExpressionLanguage
+     */
+    private $expressionLanguage;
+
+    /**
+     * @var ContainerInterface
+     */
+    private $container;
+
+    public function __construct(ExpressionLanguage $expressionLanguage, ContainerInterface $container)
+    {
+        $this->expressionLanguage = $expressionLanguage;
+        $this->container = $container;
+    }
 
     /**
      * {@inheritdoc}
@@ -16,7 +36,7 @@ class StringConverter extends AbstractPrimitiveConverter
     public function onApply($value, $propertyName, array $options, $from)
     {
         if($value !== null){
-           $value = (string) $value;
+            $value = (string) $value;
         }
 
         if(! $options['disableTrimming']){
@@ -39,9 +59,37 @@ class StringConverter extends AbstractPrimitiveConverter
             throw ConversionException::fromDomain($propertyName, $value, 'Conversion failed', $translationKey);
         }
 
+
+        if (strlen($options['validatorService'] ?? '') == 0) {
+            return $value;
+        }
+
+        $validatorService = $this->container->get($options['validatorService']);
+        $arguments = $options['validatorArguments'];
+
+        array_walk($arguments, function (&$item) use ($value, $from) {
+            $item = $this->evaluateExpression($item, $value, $from);
+        });
+
+        /** @var $checkResult CheckResult */
+        $checkResult = call_user_func_array([$validatorService, $options['validatorMethod']], $arguments);
+
+        if(!$checkResult->isSuccessful()) {
+            throw ConversionException::fromDomain($propertyName, $value, 'Conversion failed', $checkResult->getItems()[0]->getReason()->getComposedKey());
+        }
+
         return $value;
     }
 
+    private function evaluateExpression($item, $value, $from)
+    {
+        $item = $this->expressionLanguage->evaluate($item, [
+            'this' => $from,
+            'value' => $value,
+        ]);
+
+        return $item;
+    }
     /**
      * {@inheritdoc}
      */
@@ -69,11 +117,17 @@ class StringConverter extends AbstractPrimitiveConverter
         $resolver->setDefault('regex', null);
         $resolver->setDefault('regexConstant', null);
         $resolver->setDefault('translationKeyConstant', null);
+        $resolver->setDefault('validatorService', null);
+        $resolver->setDefault('validatorMethod', 'validate');
+        $resolver->setDefault('validatorArguments', ['value']);
 
         $resolver->addAllowedTypes('disableTrimming', ['bool']);
         $resolver->addAllowedTypes('regex', ['null', 'string']);
         $resolver->addAllowedTypes('regexConstant', ['null', 'string']);
         $resolver->addAllowedTypes('translationKeyConstant', ['null', 'string']);
+        $resolver->addAllowedTypes('validatorService', ['null', 'string']);
+        $resolver->addAllowedTypes('validatorMethod', ['null', 'string']);
+        $resolver->addAllowedTypes('validatorArguments', ['null', 'array']);
     }
 
     /**
