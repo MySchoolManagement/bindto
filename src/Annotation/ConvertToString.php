@@ -36,6 +36,27 @@ final class ConvertToString extends AbstractConvert
     public $translationKeyConstant;
 
     /**
+     * Identifier of the service to use for validation.
+     *
+     * @var string
+     */
+    public $validatorService;
+
+    /**
+     * Name of the method used for validation, defaults to 'validate'
+     *
+     * @var string
+     */
+    public $validatorMethod = 'validate';
+
+    /**
+     * Argument expressions for the service.
+     *
+     * @var string[]
+     */
+    public $validatorArguments = ['value'];
+
+    /**
      * {@inheritdoc}
      */
     public function getOptions(): array
@@ -45,6 +66,9 @@ final class ConvertToString extends AbstractConvert
             'regex' => $this->regex,
             'regexConstant' => $this->regexConstant,
             'translationKeyConstant' => $this->translationKeyConstant,
+            'validatorService' => $this->validatorService,
+            'validatorMethod' => $this->validatorMethod,
+            'validatorArguments' => $this->validatorArguments
         ];
     }
 }
