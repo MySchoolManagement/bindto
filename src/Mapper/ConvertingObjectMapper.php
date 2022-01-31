@@ -190,7 +190,7 @@ class ConvertingObjectMapper implements MapperInterface
                 }
 
                 each($convertAnnotations, function ($annotation) use ($metadata, $to, $from, $property) {
-                    $this->processProperty($annotation, $property, $from, $to, $metadata);
+                    $this->processProperty($annotation, $property, $from, $to, $metadata + ['parent' => $to]);
                 });
             });
         }
@@ -261,7 +261,7 @@ class ConvertingObjectMapper implements MapperInterface
         return $this->flattenNestedExceptionStackRecursive($this->exceptionStack);
     }
 
-    private function flattenNestedExceptionStackRecursive(array $level, array $propertyPath = [])
+    protected function flattenNestedExceptionStackRecursive(array $level, array $propertyPath = [])
     {
         $flattened = [];
 

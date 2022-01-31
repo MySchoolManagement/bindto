@@ -73,7 +73,7 @@ class Binder
             $object = new $object();
         }
 
-        $newObject = $this->mapper->map($request, $object);
+        $newObject = $this->mapper->map($request, $object, $metadata);
 
         $groups = $this->defaultGroups;
 
