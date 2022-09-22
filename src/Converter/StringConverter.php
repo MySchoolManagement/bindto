@@ -4,7 +4,6 @@ namespace Bindto\Converter;
 use Bindto\Annotation\ConvertAnnotationInterface;
 use Bindto\Annotation\ConvertToString;
 use Bindto\Exception\ConversionException;
-use MySchool\Module\Curriculum\CurriculumTranslations;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -43,9 +42,9 @@ class StringConverter extends AbstractPrimitiveConverter
             $value = trim($value);
         }
 
-        $regexPattern = $options['regex'];
+        $regexPattern = $options['regex'] ?? '';
 
-        if (mb_strlen($options['regexConstant']) > 0) {
+        if (mb_strlen($options['regexConstant'] ?? '') > 0) {
             $regexPattern = constant($options['regexConstant']);
         }
 
@@ -71,7 +70,7 @@ class StringConverter extends AbstractPrimitiveConverter
             $item = $this->evaluateExpression($item, $value, $from);
         });
 
-        /** @var $checkResult CheckResult */
+        /** @var CheckResult $checkResult */
         $checkResult = call_user_func_array([$validatorService, $options['validatorMethod']], $arguments);
 
         if(!$checkResult->isSuccessful()) {

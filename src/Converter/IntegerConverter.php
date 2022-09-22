@@ -4,7 +4,6 @@ namespace Bindto\Converter;
 use Bindto\Annotation\ConvertAnnotationInterface;
 use Bindto\Annotation\ConvertToInt;
 use Bindto\Exception\ConversionException;
-use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class IntegerConverter extends AbstractPrimitiveConverter
 {

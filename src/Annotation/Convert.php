@@ -2,7 +2,6 @@
 namespace Bindto\Annotation;
 
 use Doctrine\Common\Annotations\Annotation\Required;
-use Symfony\Component\Validator\Constraints\Valid;
 
 /**
  * @Annotation

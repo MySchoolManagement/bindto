@@ -77,7 +77,7 @@ class AutoConverterProcessor
             );
         }
 
-        /* @var Var_ $var */
+        /** @var Var_ $var */
         $var = first($docBlock->getTagsByName('var'));
         $type = $var->getType();
 

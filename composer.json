@@ -17,7 +17,11 @@
         "symfony/validator": "^4.2|^5.0",
         "liuggio/filler-dto": "^0.1.0",
         "doctrine/common": "^2.6|^3.0",
-        "psr/http-message": "^1.0"
+        "psr/http-message": "^1.0",
+        "ursula/entity-framework": ">=8.0.0",
+        "ramsey/uuid": "^3.0|^4.0",
+        "lstrojny/functional-php": "^1.17.0",
+        "doctrine/cache": "^1.13"
     },
     "suggest": {
         "symfony/property-access": "Required to use ConvertingObjectMapper"

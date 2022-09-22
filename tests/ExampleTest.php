@@ -2,10 +2,11 @@
 
 namespace Bindto;
 
-use Symfony\Component\HttpFoundation\Request;
 use Bindto\Fixtures\DTOCreatePage;
+use PHPUnit\Framework\TestCase;
+use Symfony\Component\HttpFoundation\Request;
 
-class ExampleTest extends \PHPUnit_Framework_TestCase
+class ExampleTest extends TestCase
 {
     /**
      * @test
