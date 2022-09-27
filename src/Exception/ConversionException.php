@@ -33,7 +33,7 @@ class ConversionException extends \Exception implements ExceptionInterface
      * @param int $code
      * @param mixed $previous
      */
-    public function __construct($propertyPath, $value = null, $message = null, $translationKey, $code = 0, $previous = null)
+    public function __construct($propertyPath, $value = null, $message = null, $translationKey = '', $code = 0, $previous = null)
     {
         parent::__construct(sprintf('The conversion of "%s" failed: %s', $propertyPath, $message ?: 'Unknown reason'), $code, $previous);
 
@@ -87,7 +87,7 @@ class ConversionException extends \Exception implements ExceptionInterface
      * @param mixed $previous
      * @return static
      */
-    public static function fromDomain($propertyPath, $value, $message = null, $translationKey, $previous = null)
+    public static function fromDomain($propertyPath, $value, $message = null, $translationKey = '', $previous = null)
     {
         return new static($propertyPath, $value, $message, $translationKey, static::DOMAIN, $previous);
     }
@@ -128,7 +128,7 @@ class ConversionException extends \Exception implements ExceptionInterface
      * @param mixed $previous
      * @return static
      */
-    public static function fromSystem($propertyPath, $value, $message = null, $translationKey, $previous = null)
+    public static function fromSystem($propertyPath, $value, $message = null, $translationKey = '', $previous = null)
     {
         return new static($propertyPath, $value, $message, $translationKey, static::SYSTEM, $previous);
     }

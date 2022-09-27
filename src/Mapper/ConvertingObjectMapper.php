@@ -2,7 +2,6 @@
 
 namespace Bindto\Mapper;
 
-use Assert\Assertion;
 use Bindto\Annotation\AutoConvert;
 use Bindto\Annotation\AutoConvertWithNestedValidation;
 use Bindto\Annotation\ConvertAnnotationInterface;

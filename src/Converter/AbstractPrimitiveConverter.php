@@ -1,7 +1,6 @@
 <?php
 namespace Bindto\Converter;
 
-use Bindto\Exception\ConversionException;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 abstract class AbstractPrimitiveConverter extends AbstractConverter

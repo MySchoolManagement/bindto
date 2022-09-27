@@ -4,7 +4,6 @@ namespace Bindto\Converter;
 use Bindto\Annotation\ConvertAnnotationInterface;
 use Bindto\Annotation\ConvertToBool;
 use Bindto\Exception\ConversionException;
-use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class BooleanConverter extends AbstractPrimitiveConverter
 {

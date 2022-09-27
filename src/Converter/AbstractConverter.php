@@ -1,9 +1,7 @@
 <?php
 namespace Bindto\Converter;
 
-use Bindto\Annotation\ConvertAnnotationInterface;
 use Bindto\ConverterInterface;
-use Bindto\Exception\ConversionException;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 abstract class AbstractConverter implements ConverterInterface

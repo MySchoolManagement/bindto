@@ -4,8 +4,8 @@ namespace Bindto\Converter;
 use Bindto\Annotation\ConvertAnnotationInterface;
 use Bindto\Annotation\ConvertToDateTime;
 use Bindto\Exception\ConversionException;
-use MySchool\Module\Foundation\ValueObject\DateTime;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Ursula\EntityFramework\ValueObject\DateTime;
 
 class DateTimeConverter extends AbstractConverter
 {
