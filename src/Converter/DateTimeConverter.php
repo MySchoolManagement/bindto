@@ -32,7 +32,11 @@ class DateTimeConverter extends AbstractConverter
             }
         }
 
-        return $date;
+        if (null !== $date) {
+            return DateTime::fromNative($date);
+        }
+
+        return null;
     }
 
     /**
@@ -71,7 +75,7 @@ class DateTimeConverter extends AbstractConverter
         $annotation->isArray = $isArray;
         $annotation->format = DateTime::DEFAULT_FORMAT;
 
-        return [];
+        return [$annotation];
     }
 
 }
