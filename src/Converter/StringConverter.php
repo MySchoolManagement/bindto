@@ -48,8 +48,8 @@ class StringConverter extends AbstractPrimitiveConverter
             $regexPattern = constant($options['regexConstant']);
         }
 
-        if (mb_strlen($regexPattern) > 0 && preg_match($regexPattern, $value) == 0) {
-            if (mb_strlen($options['translationKeyConstant']) > 0) {
+        if (mb_strlen((string) $regexPattern) > 0 && preg_match($regexPattern, $value) == 0) {
+            if (mb_strlen((string) $options['translationKeyConstant']) > 0) {
                 $translationKey = constant($options['translationKeyConstant']);
             } else {
                 $translationKey = self::DEFAULT_TRANSLATION_KEY;

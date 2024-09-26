@@ -47,7 +47,7 @@ class DoctrineConverter extends AbstractConverter
         });
 
         try {
-            if (strlen($value) > 0) {
+            if (strlen((string) $value) > 0) {
                 $entity = call_user_func_array([$repo, $options['method']], $arguments);
 
                 if ($entity === null) {
