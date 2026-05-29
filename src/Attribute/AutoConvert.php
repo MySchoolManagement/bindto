@@ -1,11 +1,10 @@
 <?php
-namespace Bindto\Annotation;
+namespace Bindto\Attribute;
 
-/**
- * @Annotation
- * @Target({"PROPERTY", "ANNOTATION"})
- */
-final class AutoConvert implements ConvertAnnotationInterface
+use Attribute;
+
+#[Attribute(Attribute::TARGET_PROPERTY | Attribute::IS_REPEATABLE)]
+final class AutoConvert implements ConvertAttributeInterface
 {
     /**
      * {@inheritdoc}

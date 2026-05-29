@@ -1,8 +1,8 @@
 <?php
 namespace Bindto\Converter;
 
-use Bindto\Annotation\ConvertAnnotationInterface;
-use Bindto\Annotation\ConvertToBool;
+use Bindto\Attribute\ConvertAttributeInterface;
+use Bindto\Attribute\ConvertToBool;
 use Bindto\Exception\ConversionException;
 
 class BooleanConverter extends AbstractPrimitiveConverter
@@ -46,18 +46,17 @@ class BooleanConverter extends AbstractPrimitiveConverter
     /**
      * {@inheritdoc}
      */
-    public function supportsAnnotation(ConvertAnnotationInterface $annotation): bool
+    public function supportsAttribute(ConvertAttributeInterface $attribute): bool
     {
-        return $annotation instanceof ConvertToBool;
+        return $attribute instanceof ConvertToBool;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function autoconfigure(ConvertAnnotationInterface $sourceAnnotation, string $typeName, bool $isArray, bool $isNullable): array
+    public function autoconfigure(ConvertAttributeInterface $sourceAttribute, string $typeName, bool $isArray, bool $isNullable): array
     {
-        $annotation = new ConvertToBool();
-        $annotation->isArray = $isArray;
+        $annotation = new ConvertToBool($isArray);
 
         return [$annotation];
     }

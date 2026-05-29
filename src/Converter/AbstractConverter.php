@@ -17,9 +17,8 @@ abstract class AbstractConverter implements ConverterInterface
     {
         $resolver = new OptionsResolver();
         $this->configureOptions($resolver);
-        $resolved = $resolver->resolve($options);
 
-        return $resolved;
+        return $resolver->resolve($options);
     }
 
     /**

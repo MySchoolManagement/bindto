@@ -1,13 +1,11 @@
 <?php
-namespace Bindto\Annotation;
+namespace Bindto\Attribute;
 
+use Attribute;
 use Symfony\Component\Validator\Constraints\Valid;
 
-/**
- * @Annotation
- * @Target({"PROPERTY", "ANNOTATION"})
- */
-final class AutoConvertWithNestedValidation extends Valid implements ConvertAnnotationInterface
+#[Attribute(Attribute::TARGET_PROPERTY | Attribute::IS_REPEATABLE)]
+final class AutoConvertWithNestedValidation extends Valid implements ConvertAttributeInterface
 {
     /**
      * {@inheritdoc}

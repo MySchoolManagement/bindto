@@ -1,8 +1,8 @@
 <?php
 namespace Bindto\Converter;
 
-use Bindto\Annotation\ConvertAnnotationInterface;
-use Bindto\Annotation\ConvertToInt;
+use Bindto\Attribute\ConvertAttributeInterface;
+use Bindto\Attribute\ConvertToInt;
 use Bindto\Exception\ConversionException;
 
 class IntegerConverter extends AbstractPrimitiveConverter
@@ -43,18 +43,17 @@ class IntegerConverter extends AbstractPrimitiveConverter
     /**
      * {@inheritdoc}
      */
-    public function supportsAnnotation(ConvertAnnotationInterface $annotation): bool
+    public function supportsAttribute(ConvertAttributeInterface $attribute): bool
     {
-        return $annotation instanceof ConvertToInt;
+        return $attribute instanceof ConvertToInt;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function autoconfigure(ConvertAnnotationInterface $sourceAnnotation, string $typeName, bool $isArray, bool $isNullable): array
+    public function autoconfigure(ConvertAttributeInterface $sourceAttribute, string $typeName, bool $isArray, bool $isNullable): array
     {
-        $annotation = new ConvertToInt();
-        $annotation->isArray = $isArray;
+        $annotation = new ConvertToInt($isArray);
 
         return [$annotation];
     }

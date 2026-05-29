@@ -4,25 +4,20 @@ declare(strict_types=1);
 
 namespace Bindto\Mapper;
 
-use Bindto\Annotation\DefaultValues;
-use Doctrine\Common\Annotations\AnnotationReader;
-use Doctrine\Common\Annotations\Reader;
-use Bindto\Annotation\DefaultValue;
+use Bindto\Attribute\DefaultValue;
+use Bindto\Attribute\DefaultValues;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use Symfony\Component\PropertyAccess\Exception\NoSuchIndexException;
 use Symfony\Component\PropertyAccess\Exception\UnexpectedTypeException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
+use function Functional\each;
+use function Functional\map;
 
 /**
  * Mapper that processes @DefaultValue annotations for a property.
  */
 class DefaultValueProcessor
 {
-    /**
-     * @var AnnotationReader
-     */
-    private $annotationReader;
-
     /**
      * @var ExpressionLanguage
      */
@@ -40,13 +35,8 @@ class DefaultValueProcessor
      */
     private $processedMap = [];
 
-    /**
-     * @param Reader annotationReader
-     * @param ExpressionLanguage $expressionLanguage
-     */
-    public function __construct(Reader $annotationReader, ExpressionLanguage $expressionLanguage)
+    public function __construct(ExpressionLanguage $expressionLanguage)
     {
-        $this->annotationReader = $annotationReader;
         $this->expressionLanguage = $expressionLanguage;
         $this->propertyAccessor = PropertyAccess::createPropertyAccessor();
     }
@@ -57,59 +47,61 @@ class DefaultValueProcessor
      */
     public function process(\ReflectionProperty $property, $obj)
     {
-        array_map(
-            function ($annotation) use ($property, $obj) {
-                $valueAnnotations = [];
+        $attributes = map($property->getAttributes(), fn(\ReflectionAttribute $attrib) => $attrib->newInstance());
 
-                if ($annotation instanceof DefaultValues) {
-                    $valueAnnotations = $annotation->defaults;
-                } else if ($annotation instanceof DefaultValue) {
-                    $valueAnnotations[] = $annotation;
+        each($attributes,
+            function ($attribute) use ($property, $obj) {
+                $valueAttributes = [];
+
+                if ($attribute instanceof DefaultValues) {
+                    $valueAttributes = $attribute->defaults;
+                } else if ($attribute instanceof DefaultValue) {
+                    $valueAttributes[] = $attribute;
                 }
 
-                foreach ($valueAnnotations as $valueAnnotation) {
-                    if (false === $this->hasProcessed($valueAnnotation, $obj, $property)) {
-                        $this->processProperty($valueAnnotation, $property, $obj);
+                foreach ($valueAttributes as $valueAttribute) {
+                    if (false === $this->hasProcessed($valueAttribute, $obj, $property)) {
+                        $this->processProperty($valueAttribute, $property, $obj);
                     }
                 }
-            }, $this->annotationReader->getPropertyAnnotations($property)
+            }
         );
     }
 
-    private function processProperty(DefaultValue $annotation, \ReflectionProperty $property, $obj)
+    private function processProperty(DefaultValue $attribute, \ReflectionProperty $property, $obj)
     {
         $propertyName = $property->getName();
-        $value = $this->getPropertyValue($obj, $propertyName, $annotation->propertyPath);
+        $value = $this->getPropertyValue($obj, $propertyName, $attribute->propertyPath);
 
         // if there's already a value do nothing
         if (null === $value) {
-            if (null !== $annotation->expr) {
-                $newValue = $this->evaluateExpression($annotation->expr, $obj);
-            } elseif (null !== $annotation->const) {
-                $newValue = $this->evaluateConstant($annotation->const);
+            if (null !== $attribute->expr) {
+                $newValue = $this->evaluateExpression($attribute->expr, $obj);
+            } elseif (null !== $attribute->const) {
+                $newValue = $this->evaluateConstant($attribute->const);
             } else {
                 throw new \LogicException('No default value mechanism provided');
             }
 
-            $this->setPropertyValue($obj, $propertyName, $annotation->propertyPath, $newValue);
-            $this->setProcessed($annotation, $obj, $property);
+            $this->setPropertyValue($obj, $propertyName, $attribute->propertyPath, $newValue);
+            $this->setProcessed($attribute, $obj, $property);
         }
     }
 
-    private function hasProcessed(DefaultValue $annotation, $obj, \ReflectionProperty $property): bool
+    private function hasProcessed(DefaultValue $attribute, $obj, \ReflectionProperty $property): bool
     {
-        return in_array($this->createCacheKey($annotation, $obj, $property), $this->processedMap, true);
+        return in_array($this->createCacheKey($attribute, $obj, $property), $this->processedMap, true);
     }
 
-    private function setProcessed(DefaultValue $annotation, $obj, \ReflectionProperty $property)
+    private function setProcessed(DefaultValue $attribute, $obj, \ReflectionProperty $property)
     {
-        $this->processedMap[] = $this->createCacheKey($annotation, $obj, $property);
+        $this->processedMap[] = $this->createCacheKey($attribute, $obj, $property);
     }
 
-    private function createCacheKey(DefaultValue $annotation, $obj, \ReflectionProperty $property): string
+    private function createCacheKey(DefaultValue $attribute, $obj, \ReflectionProperty $property): string
     {
         return implode('', [
-            spl_object_hash($annotation),
+            spl_object_hash($attribute),
             spl_object_hash($obj),
             spl_object_hash($property),
         ]);

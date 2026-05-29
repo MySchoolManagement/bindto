@@ -1,7 +1,7 @@
 <?php
 namespace Bindto\Converter;
 
-use Bindto\Annotation\ConvertAnnotationInterface;
+use Bindto\Attribute\ConvertAttributeInterface;
 use Bindto\Exception\ConversionException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
@@ -94,7 +94,7 @@ class DoctrineConverter extends AbstractConverter
     /**
      * {@inheritdoc}
      */
-    public function supportsAnnotation(ConvertAnnotationInterface $annotation): bool
+    public function supportsAttribute(ConvertAttributeInterface $attribute): bool
     {
         return false;
     }
@@ -102,7 +102,7 @@ class DoctrineConverter extends AbstractConverter
     /**
      * {@inheritdoc}
      */
-    public function autoconfigure(ConvertAnnotationInterface $sourceAnnotation, string $typeName, bool $isArray, bool $isNullable): array
+    public function autoconfigure(ConvertAttributeInterface $sourceAttribute, string $typeName, bool $isArray, bool $isNullable): array
     {
         return [];
     }

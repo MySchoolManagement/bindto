@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace Bindto\Mapper;
 
-use Bindto\Annotation\AutoConvert;
-use Bindto\Annotation\ConvertAnnotationInterface;
+use Bindto\Attribute\AutoConvert;
+use Bindto\Attribute\ConvertAttributeInterface;
 use Bindto\ConverterInterface;
-use function Functional\first;
 use Doctrine\Common\Collections\Collection;
 use phpDocumentor\Reflection\DocBlock\Tags\Var_;
 use phpDocumentor\Reflection\DocBlockFactory;
@@ -18,6 +17,7 @@ use phpDocumentor\Reflection\Types\ContextFactory;
 use phpDocumentor\Reflection\Types\Null_;
 use ReflectionProperty;
 use Ursula\Common\Exception\DomainException;
+use function Functional\first;
 
 /**
  * Mapper that processes @AutoConvert annotations for a property.
@@ -46,7 +46,7 @@ class AutoConverterProcessor
         $this->docBlockContextFactory = new ContextFactory();
     }
 
-    public function process(ConvertAnnotationInterface $annotation, ReflectionProperty $property): array
+    public function process(ConvertAttributeInterface $attribute, ReflectionProperty $property): array
     {
         $typeInfo = $this->extractTypeInformation($property);
         $converters = $this->convertingObjectMapper->getConverters();
@@ -59,7 +59,7 @@ class AutoConverterProcessor
             throw new \DomainException('There is no converter that can produce this type: ' . $typeInfo->typeName);
         }
 
-        return $converter->autoconfigure($annotation, $typeInfo->typeName, $typeInfo->isArray, $typeInfo->isNullable);
+        return $converter->autoconfigure($attribute, $typeInfo->typeName, $typeInfo->isArray, $typeInfo->isNullable);
     }
 
     private function extractTypeInformation(ReflectionProperty $property): TypeInfo

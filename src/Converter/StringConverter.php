@@ -1,8 +1,8 @@
 <?php
 namespace Bindto\Converter;
 
-use Bindto\Annotation\ConvertAnnotationInterface;
-use Bindto\Annotation\ConvertToString;
+use Bindto\Attribute\ConvertAttributeInterface;
+use Bindto\Attribute\ConvertToString;
 use Bindto\Exception\ConversionException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
@@ -140,18 +140,17 @@ class StringConverter extends AbstractPrimitiveConverter
     /**
      * {@inheritdoc}
      */
-    public function supportsAnnotation(ConvertAnnotationInterface $annotation): bool
+    public function supportsAttribute(ConvertAttributeInterface $attribute): bool
     {
-        return $annotation instanceof ConvertToString;
+        return $attribute instanceof ConvertToString;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function autoconfigure(ConvertAnnotationInterface $sourceAnnotation, string $typeName, bool $isArray, bool $isNullable): array
+    public function autoconfigure(ConvertAttributeInterface $sourceAttribute, string $typeName, bool $isArray, bool $isNullable): array
     {
-        $annotation = new ConvertToString();
-        $annotation->isArray = $isArray;
+        $annotation = new ConvertToString($isArray);
 
         return [$annotation];
     }

@@ -1,7 +1,7 @@
 <?php
-namespace Bindto\Annotation;
+namespace Bindto\Attribute;
 
-interface ConvertAnnotationInterface
+interface ConvertAttributeInterface
 {
     public function isArray(): bool;
     public function getOptions(): array;

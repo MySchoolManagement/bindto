@@ -1,8 +1,8 @@
 <?php
 namespace Bindto\Converter;
 
-use Bindto\Annotation\ConvertAnnotationInterface;
-use Bindto\Annotation\ConvertToArray;
+use Bindto\Attribute\ConvertAttributeInterface;
+use Bindto\Attribute\ConvertToArray;
 use Bindto\Exception\ConversionException;
 
 class ArrayConverter extends AbstractPrimitiveConverter
@@ -43,18 +43,17 @@ class ArrayConverter extends AbstractPrimitiveConverter
     /**
      * {@inheritdoc}
      */
-    public function supportsAnnotation(ConvertAnnotationInterface $annotation): bool
+    public function supportsAttribute(ConvertAttributeInterface $attribute): bool
     {
-        return $annotation instanceof ConvertToArray;
+        return $attribute instanceof ConvertToArray;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function autoconfigure(ConvertAnnotationInterface $sourceAnnotation, string $typeName, bool $isArray, bool $isNullable): array
+    public function autoconfigure(ConvertAttributeInterface $sourceAttribute, string $typeName, bool $isArray, bool $isNullable): array
     {
-        $annotation = new ConvertToArray();
-        $annotation->isArray = $isArray;
+        $annotation = new ConvertToArray($isArray);
 
         return [$annotation];
     }

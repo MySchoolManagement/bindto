@@ -1,7 +1,7 @@
 <?php
 namespace Bindto;
 
-use Bindto\Annotation\ConvertAnnotationInterface;
+use Bindto\Attribute\ConvertAttributeInterface;
 use Bindto\Exception\ConversionException;
 
 interface ConverterInterface
@@ -29,23 +29,23 @@ interface ConverterInterface
     public function canProduceType(string $type): bool;
 
     /**
-     * Does the converter support the given annotation.
+     * Does the converter support the given attribute.
      *
-     * @param ConvertAnnotationInterface $annotation
+     * @param ConvertAttributeInterface $attribute
      * @return bool
      */
-    public function supportsAnnotation(ConvertAnnotationInterface $annotation): bool;
+    public function supportsAttribute(ConvertAttributeInterface $attribute): bool;
 
     /**
-     * Where it is possible this is expected to create one or more automatically configured annotations that can then
+     * Where it is possible this is expected to create one or more automatically configured attribute that can then
      * be fed through the conversion system.
      *
-     * @param ConvertAnnotationInterface $sourceAnnotation The annotation causing auto configuration
+     * @param ConvertAttributeInterface $sourceAttribute The attribute causing auto configuration
      * @param string                     $typeName
      * @param bool                       $isArray
      * @param bool                       $isNullable
      *
-     * @return ConvertAnnotationInterface[]
+     * @return ConvertAttributeInterface[]
      */
-    public function autoconfigure(ConvertAnnotationInterface $sourceAnnotation, string $typeName, bool $isArray, bool $isNullable): array;
+    public function autoconfigure(ConvertAttributeInterface $sourceAttribute, string $typeName, bool $isArray, bool $isNullable): array;
 }

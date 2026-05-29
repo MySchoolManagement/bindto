@@ -1,8 +1,8 @@
 <?php
 namespace Bindto\Converter;
 
-use Bindto\Annotation\ConvertAnnotationInterface;
-use Bindto\Annotation\ConvertToFloat;
+use Bindto\Attribute\ConvertAttributeInterface;
+use Bindto\Attribute\ConvertToFloat;
 use Bindto\Exception\ConversionException;
 
 class FloatConverter extends AbstractPrimitiveConverter
@@ -45,18 +45,17 @@ class FloatConverter extends AbstractPrimitiveConverter
     /**
      * {@inheritdoc}
      */
-    public function supportsAnnotation(ConvertAnnotationInterface $annotation): bool
+    public function supportsAttribute(ConvertAttributeInterface $attribute): bool
     {
-        return $annotation instanceof ConvertToFloat;
+        return $attribute instanceof ConvertToFloat;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function autoconfigure(ConvertAnnotationInterface $sourceAnnotation, string $typeName, bool $isArray, bool $isNullable): array
+    public function autoconfigure(ConvertAttributeInterface $sourceAttribute, string $typeName, bool $isArray, bool $isNullable): array
     {
-        $annotation = new ConvertToFloat();
-        $annotation->isArray = $isArray;
+        $annotation = new ConvertToFloat($isArray);
 
         return [$annotation];
     }

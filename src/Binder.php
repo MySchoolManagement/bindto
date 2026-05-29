@@ -5,10 +5,6 @@ namespace Bindto;
 use Bindto\Mapper\MapperStrategy;
 use Symfony\Component\Validator\Validation;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use Doctrine\Common\Annotations\AnnotationReader;
-use Doctrine\Common\Annotations\CachedReader;
-use Doctrine\Common\Cache\ApcCache;
-use Doctrine\Common\Cache\FilesystemCache;
 
 class Binder
 {
@@ -32,7 +28,7 @@ class Binder
     public static function createDefaultBinder()
     {
         $validator = Validation::createValidatorBuilder()
-            ->enableAnnotationMapping()
+            ->enableAttributeMapping()
             ->getValidator();
         $mapper = MapperStrategy::createDefaultMapperStrategy();
 
@@ -41,16 +37,10 @@ class Binder
 
     public static function createSimpleProductionBinder()
     {
-        if (!extension_loaded('apc') || false === @apc_cache_info()) {
-            $readerCache = new CachedReader(new AnnotationReader(), new FilesystemCache(sys_get_temp_dir().'/Bindto'));
-        } else {
-            $readerCache = new CachedReader(new AnnotationReader(), new ApcCache());
-        }
-
         $builder = Validation::createValidatorBuilder();
         $builder->setTranslationDomain('validators');
         $builder->addObjectInitializers([]);
-        $builder->enableAnnotationMapping($readerCache);
+        $builder->enableAttributeMapping();
         $validator = $builder->getValidator();
 
         $mapper = MapperStrategy::createDefaultMapperStrategy();

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Bindto\Converter;
 
-use Bindto\Annotation\ConvertAnnotationInterface;
+use Bindto\Attribute\ConvertAttributeInterface;
 use Bindto\Mapper\ConvertingObjectMapper;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -58,7 +58,7 @@ class NestedObjectConverter extends AbstractConverter
     /**
      * {@inheritdoc}
      */
-    public function supportsAnnotation(ConvertAnnotationInterface $annotation): bool
+    public function supportsAttribute(ConvertAttributeInterface $attribute): bool
     {
         return false;
     }
@@ -66,7 +66,7 @@ class NestedObjectConverter extends AbstractConverter
     /**
      * {@inheritdoc}
      */
-    public function autoconfigure(ConvertAnnotationInterface $sourceAnnotation, string $typeName, bool $isArray, bool $isNullable): array
+    public function autoconfigure(ConvertAttributeInterface $sourceAttribute, string $typeName, bool $isArray, bool $isNullable): array
     {
         return [];
     }

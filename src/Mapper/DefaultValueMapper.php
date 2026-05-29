@@ -1,31 +1,21 @@
 <?php
 namespace Bindto\Mapper;
 
+use Bindto\Attribute\DefaultValue;
 use Bindto\MapperInterface;
-use Bindto\Annotation\DefaultValue;
 
 /**
  * Mapper that reads @DefaultValue annotations and attempts to set a default value.
  */
 class DefaultValueMapper implements MapperInterface
 {
-    /**
-     * @var MapperInterface
-     */
-    private $propertyMapper;
+    private DefaultValueProcessor $defaultValueProcessor;
 
     /**
-     * @var DefaultValueProcessor
-     */
-    private $defaultValueProcessor;
-
-    /**
-     * @param MapperInterface       $propertyMapper
      * @param DefaultValueProcessor $defaultValueProcessor
      */
-    public function __construct(MapperInterface $propertyMapper, DefaultValueProcessor $defaultValueProcessor)
+    public function __construct(DefaultValueProcessor $defaultValueProcessor)
     {
-        $this->propertyMapper = $propertyMapper;
         $this->defaultValueProcessor = $defaultValueProcessor;
     }
 

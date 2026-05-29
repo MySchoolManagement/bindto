@@ -1,8 +1,8 @@
 <?php
 namespace Bindto\Converter;
 
-use Bindto\Annotation\ConvertAnnotationInterface;
-use Bindto\Annotation\ConvertToDateTime;
+use Bindto\Attribute\ConvertAttributeInterface;
+use Bindto\Attribute\ConvertToDateTime;
 use Bindto\Exception\ConversionException;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Ursula\EntityFramework\ValueObject\DateTime;
@@ -61,19 +61,20 @@ class DateTimeConverter extends AbstractConverter
     /**
      * @inheritDoc
      */
-    public function supportsAnnotation(ConvertAnnotationInterface $annotation): bool
+    public function supportsAttribute(ConvertAttributeInterface $attribute): bool
     {
-        return $annotation instanceof ConvertToDateTime;
+        return $attribute instanceof ConvertToDateTime;
     }
 
     /**
      * @inheritDoc
      */
-    public function autoconfigure(ConvertAnnotationInterface $sourceAnnotation, string $typeName, bool $isArray, bool $isNullable): array
+    public function autoconfigure(ConvertAttributeInterface $sourceAttribute, string $typeName, bool $isArray, bool $isNullable): array
     {
-        $annotation = new ConvertToDateTime();
-        $annotation->isArray = $isArray;
-        $annotation->format = DateTime::DEFAULT_FORMAT;
+        $annotation = new ConvertToDateTime(
+            format: DateTime::DEFAULT_FORMAT,
+            isArray: $isArray,
+        );
 
         return [$annotation];
     }

@@ -1,9 +1,8 @@
 <?php
 namespace Bindto\Converter;
 
-use Bindto\Annotation\ConvertAnnotationInterface;
-use Bindto\Annotation\ConvertToUuid;
-use Bindto\Converter\AbstractConverter;
+use Bindto\Attribute\ConvertAttributeInterface;
+use Bindto\Attribute\ConvertToUuid;
 use Bindto\Exception\ConversionException;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
@@ -15,7 +14,7 @@ class UuidConverter extends AbstractConverter
     /**
      * {@inheritdoc}
      */
-    public function apply($value, $propertyPath, array $options, $from, array $metadata)
+    public function apply($value, $propertyName, array $options, $from, array $metadata)
     {
         if (true === is_object($value)) {
             return $value;
@@ -24,7 +23,7 @@ class UuidConverter extends AbstractConverter
         try {
             return Uuid::fromString($value);
         } catch (\Throwable $ex) {
-            throw ConversionException::fromDomain($propertyPath, $value, $ex->getMessage(), 'conversion_exception.invalid_argument_exception',$ex);
+            throw ConversionException::fromDomain($propertyName, $value, $ex->getMessage(), 'conversion_exception.invalid_argument_exception',$ex);
         }
     }
 
@@ -50,18 +49,17 @@ class UuidConverter extends AbstractConverter
     /**
      * {@inheritdoc}
      */
-    public function supportsAnnotation(ConvertAnnotationInterface $annotation): bool
+    public function supportsAttribute(ConvertAttributeInterface $attribute): bool
     {
-        return $annotation instanceof ConvertToUuid;
+        return $attribute instanceof ConvertToUuid;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function autoconfigure(ConvertAnnotationInterface $sourceAnnotation, string $typeName, bool $isArray, bool $isNullable): array
+    public function autoconfigure(ConvertAttributeInterface $sourceAttribute, string $typeName, bool $isArray, bool $isNullable): array
     {
-        $annotation = new ConvertToUuid();
-        $annotation->isArray;
+        $annotation = new ConvertToUuid($isArray);
 
         return [$annotation];
     }
