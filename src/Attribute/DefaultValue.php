@@ -11,7 +11,7 @@ class DefaultValue
         /**
          * A path can be provided for setting child properties.
          */
-        public readonly string  $propertyPath,
+        public readonly ?string  $propertyPath = null,
 
         /**
          * Expression to apply.
